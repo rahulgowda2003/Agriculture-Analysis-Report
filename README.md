@@ -437,7 +437,7 @@ Year	Average Yield
 - 2014	27.8K Kg
 - 2018	27.2K Kg
 
-Lowest Yield : 2006 → 22.3K
+Lowest Yield : 2006 : 22.3K Kg
 
 2] Average Yield by Season
 
@@ -459,7 +459,7 @@ Crop	Avg Yield
 - Tea	23K Kg
 - Blackgram	16K Kg
 
-Bottom yield crop : Cashew → 3K
+Bottom yield crop : Cashew : 3K Kg
 
 4] Average Yield by Location
 
@@ -472,4 +472,4 @@ Location	Average Yield
 - Madikeri	24.9K Kg
 - Kasaragodu	24.4K Kg
 
-Lowest Yield : Davangere → 11.8K
+Lowest Yield : Davangere : 11.8K Kg
