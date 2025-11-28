@@ -1,4 +1,4 @@
-# Agriculture Climate Analytics Report
+# Agriculture Climate Analytics – Power BI | AWS | Snowflake | SQL
 
 A multi-page Power BI dashboard analyzing Temperature, Humidity, Rainfall, and Crop Yield across years, seasons, locations, and crop types.
 
