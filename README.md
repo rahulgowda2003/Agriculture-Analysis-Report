@@ -25,13 +25,20 @@ This dashboard is useful for farmers, agronomists, researchers, policymakers, an
 - step 1 : Created a bucket in Amazon S3 named "powerb", then uploaded the data file which was in csv type to the S3 bucket.
 - step 2 : IAM role created in AWS named "powerbi.role" to establish connection between AWS and Snowflake, copy the ARN in the role i.e. arn:aws:iam::825765422200:role/powerbi.role
 - step 3 : In snowflake created a new integration.sql file, write query for the intergration object:
+  
 
    CREATE OR REPLACE STORAGE INTEGRATION PBI_Integration  ##PBI_Integration is the name of the integration object
+  
   TYPE = EXTERNAL_STAGE
+  
   STORAGE_PROVIDER = 'S3'
+  
   ENABLED = TRUE
+  
   STORAGE_AWS_ROLE_ARN = 'arn:aws:iam::825765422200:role/powerbi.role'   ##paste the copied ARN from IAM role
+  
   STORAGE_ALLOWED_LOCATIONS = ('s3://powerb/')  ##change the name of the S3 bucket to mentioned in step 1
+  
   COMMENT = 'Optional Comment'
 
 - step 4 : After creating integratoin object, run query to get the description of the integration object, after the execution of the query copy the code representing in "STORAGE_AWS_IAM_USER_ARN" and "STORAGE_AWS_EXTERNAL_ID" respectively.
@@ -54,12 +61,18 @@ Crops	string,price	int,Season string
 );
 
 create stage PowerBI.PBI_Data.pbi_stage   
+
 url = 's3://powerb'
+
 storage_integration = PBI_Integration
+
  
 copy into PBI_Dataset 
+
 from @pbi_stage
+
 file_format = (type=csv field_delimiter=',' skip_header=1 )
+
 on_error = 'continue'
 
 ##to load data from S3 bucket to snowflake
@@ -69,67 +82,90 @@ list @pbi_stage ##to confirm the loaded data
 - step 7 : Transforming the data in Snowflake, increasing "rainfall" column by 10%, decreasing "area" column by 10% and adding new column "year_group" to get the new category of the year.
 
 create table agriculture as
+
 select * from pbi_dataset;
 
 
-select * from agriculture;
-
-
 update agriculture
+
 set rainfall = 1.1*rainfall;
 
-update agriculture
-set area = 0.9*area;
 
-select * from agriculture;
+update agriculture
+
+set area = 0.9*area;
 
 
 //Year 2004 & 2009 - Y1
+
 //Year 2010 & 2015 - Y2
+
 //Year 2016 & 2019 - Y3
 
+
 ALTER TABLE Agriculture
+
 add Year_Group String;
+
 
 select * from agriculture;
 
 //1st update
+
 update agriculture
+
 set year_group = 'Y1'
+
 where year >=2004 and year<=2009
 
+
 //2nd update
+
 update agriculture
+
 set year_group = 'Y2'
+
 where year >=2010 and year<=2015
 
 
+
 //3rd Update
+
 update agriculture
+
 set year_group = 'Y3'
+
 where year >=2016 and year<=2019
-
-
-select * from agriculture;
 
 - step 8 : It was observed that in LOCATION column "Banglore" and "Davangere" where having blank values for "SOIL_TYPE", it was filled with "Red" and "Red Sandy" respectively by wrting query.
 
   //1st Update
+  
   upadate agriculture
+  
   set SOIL_TYPE = 'Red'
+  
   where LOCATION = 'Banglore'
+  
 
   //2nd Update
+  
   upadate agriculture
+  
   set SOIL_TYPE = 'Red Sandy'
+  
   where LOCATION = 'Davangere' and CROPS in ('Cashew', 'Coconut', 'Groundnut')
+  
 
   //3rd Update
+  
   upadate agriculture
+  
   set SOIL_TYPE = 'Black'
+  
   where LOCATION = 'Davangere' and CROPS = 'Blackgram'
 
-- step 8 : Adding "rainfall_group" column and importing data into Power BI Desktop.
+- step 9 : Adding "rainfall_group" column and importing data into Power BI Desktop.
 
   Opened power query editor and in view tab, under Data preview section, check "column distribution", "column quality" and "column profile" options.
 
@@ -138,61 +174,78 @@ select * from agriculture;
   It was observed that in none of the columns errors and no empty values were present.
 
   //Rainfall_Groups
+  
 //Min 255 Max 4103
 
 //rainfall 255 & 1200 - Low
+
 //rainfall 1200 2800 - Medium
+
 //Rainfall 2800 & 4103 - High
 
+
 alter table agriculture
+
 add rainfall_groups string;
 
-select * from agriculture;
 
 //1st Update
+
 update agriculture
+
 set rainfall_groups = 'Low'
+
 where rainfall>=255 and rainfall<1200
 
+
 //2nd update
+
 update agriculture
+
 set rainfall_groups = 'Medium'
+
 where rainfall >=1200 and rainfall<2800
 
-//3rd update
-update agriculture
-set rainfall_groups='High'
-where rainfall >=2800
 
-select * from agriculture;
+//3rd update
+
+update agriculture
+
+set rainfall_groups='High'
+
+where rainfall >=2800
 
 - step 10 : By looking at the RAINFALL column, the values were not accurate, using DAX created a new column named "Actual Rainfall" to adjust the values by dividing it by 3.5 to make it as realistic as possible. Using the Actual Rainfall column make the "Rainfall Analysis" page and the four stacked bar chart.
 
   Actual Rainfall = 
 DIVIDE(AGRICULTURE[RAINFALL],3.5,BLANK())
 
-- step 9 : Creating four page report for the better understanding of the data by extracting the valueable insights namely "Rainfall Analysis", "Temperature Analysis", "Humidity  Analysis" and "Yield Analysis" respectively.
-- step 10 : Added four charts for each report.
+- step 10 : Creating four page report for the better understanding of the data by extracting the valueable insights namely "Rainfall Analysis", "Temperature Analysis", "Humidity  Analysis" and "Yield Analysis" respectively.
+- step 11 : Added four charts for each report.
 
   a) Rainfall Analysis:
+  
   - Average Rainfall by Year
   - Average Rainfall by Season
   - Average Rainfall by Crops
   - Average Rainfall by Location
 
   b) Temperature Analysis:
+  
   - Average Temperature by Year
   - Average Temperature by Season
   - Average Temperature by Crops
   - Average Temperature Ranking by Location
 
   c) Humidity Analysis
+
   - Average Humidity by Year
   - Average Humidity by Season
   - Average Humidity by Crops
   - Average Humidity by Location
 
   d) Yield Analysis
+
   - Average Yield by Year
   - Average Yield by Season
   - Average Yield by Crops
